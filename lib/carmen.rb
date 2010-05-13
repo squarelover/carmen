@@ -8,18 +8,32 @@ end
 module Carmen
 
   class << self
-    attr_accessor :default_country
+    attr_accessor :default_country, :data_path, :country_data, :state_data
+    
+    def data_path=(new_path)
+      @data_path = new_path
+      @country_data = nil
+      @state_data = nil
+    end
+    
+    def country_data
+      @country_data ||= YAML.load_file(File.join(data_path, 'countries.yml'))
+    end
+    
+    def state_data
+      @state_data ||= Dir[data_path + '/states/*.yml'].map do |file_name|
+        [File::basename(file_name, '.yml').upcase, YAML.load_file(file_name)]
+      end
+    end
   end
   
   self.default_country = 'US'
   
-  data_path = File.join(File.dirname(__FILE__), '../data')
+  self.data_path = File.join(File.dirname(__FILE__), '../data')
   
-  COUNTRIES = YAML.load_file(File.join(data_path, 'countries.yml'))
+  COUNTRIES = self.country_data
   
-  STATES = Dir[data_path + '/states/*.yml'].map do |file_name|
-    [File::basename(file_name, '.yml').upcase, YAML.load_file(file_name)]
-  end
+  STATES = self.state_data
 
   # Raised when attempting to retrieve states for an unsupported country
   class StatesNotSupported < RuntimeError; end
