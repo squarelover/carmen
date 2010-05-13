@@ -31,10 +31,6 @@ module Carmen
   
   self.data_path = File.join(File.dirname(__FILE__), '../data')
   
-  COUNTRIES = self.country_data
-  
-  STATES = self.state_data
-
   # Raised when attempting to retrieve states for an unsupported country
   class StatesNotSupported < RuntimeError; end
 
@@ -44,25 +40,25 @@ module Carmen
   # Returns the country name corresponding to the supplied country code
   #  Carmen::country_name('TV') => 'Tuvalu'
   def self.country_name(country_code)
-    search_collection(COUNTRIES, country_code, 1, 0)
+    search_collection(country_data, country_code, 1, 0)
   end
 
   # Returns the country code corresponding to the supplied country name
   #  Carmen::country_code('Canada') => 'CA'
   def self.country_code(country_name)
-    search_collection(COUNTRIES, country_name, 0, 1)
+    search_collection(country_data, country_name, 0, 1)
   end
 
   # Returns an array of all country codes
   #  Carmen::country_codes => ['AF', 'AX', 'AL', ... ]
   def self.country_codes
-    COUNTRIES.map {|c| c[1] }
+    country_data.map {|c| c[1] }
   end
   
   # Returns an array of all country codes
   #  Carmen::country_name => ['Afghanistan', 'Aland Islands', 'Albania', ... ]
   def self.country_names
-    COUNTRIES.map {|c| c[0] }
+    country_data.map {|c| c[0] }
   end
   
   # Returns the state name corresponding to the supplied state code within the specified country
@@ -94,14 +90,14 @@ module Carmen
   def self.states(country_code = Carmen.default_country)
     raise NonexistentCountry unless country_codes.include?(country_code)
     raise StatesNotSupported unless states?(country_code)
-    search_collection(STATES, country_code, 0, 1)
+    search_collection(state_data, country_code, 0, 1)
   end
 
   # Returns whether states are supported for the given country code
   #   Carmen::states?('US') => true
   #   Carmen::states?('ZZ') => false
   def self.states?(country_code)
-    STATES.any? do |array| k,v = array
+    state_data.any? do |array| k,v = array
       k == country_code
     end
   end
